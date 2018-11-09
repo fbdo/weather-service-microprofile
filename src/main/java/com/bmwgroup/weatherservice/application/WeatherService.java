@@ -10,7 +10,7 @@ import java.util.Optional;
 public class WeatherService {
 
     @Inject
-    @Named("reliable")
+    @Named("cached")
     private WeatherProviderClient weatherProviderClient;
 
     public WeatherData current(Optional<String> cityName) {
