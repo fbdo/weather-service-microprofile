@@ -1,0 +1,49 @@
+{
+  "message": "accurate",
+  "cod": "200",
+  "count": 1,
+  "list": [
+    {
+      "id": 2867714,
+      "name": "Munich",
+      "coord": {
+        "lat": 48.1371,
+        "lon": 11.5754
+      },
+      "main": {
+        "temp": 8,
+        "pressure": 1017,
+        "humidity": 93,
+        "temp_min": 8,
+        "temp_max": 8
+      },
+      "dt": 1541752800,
+      "wind": {
+        "speed": 2.1,
+        "deg": 260
+      },
+      "sys": {
+        "country": "DE"
+      },
+      "rain": null,
+      "snow": null,
+      "clouds": {
+        "all": 90
+      },
+      "weather": [
+        {
+          "id": 701,
+          "main": "Mist",
+          "description": "mist",
+          "icon": "50d"
+        },
+        {
+          "id": 300,
+          "main": "Drizzle",
+          "description": "light intensity drizzle",
+          "icon": "09d"
+        }
+      ]
+    }
+  ]
+}

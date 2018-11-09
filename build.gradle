@@ -1,0 +1,93 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.6.RELEASE"
+    }
+}
+
+apply plugin: "io.spring.dependency-management"
+
+group 'com.bmwgroup'
+version = '0.0.1-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'war'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url "https://maven.java.net/content/groups/public/"
+    }
+}
+
+ext {
+    payaraVersion = '5.183'
+}
+
+dependencies {
+    providedCompile 'org.eclipse.microprofile:microprofile:1.4'
+    providedCompile 'javax.json.bind:javax.json.bind-api:1.0'
+
+    providedCompile group: 'fish.payara.extras', name: 'payara-micro', version: payaraVersion
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.jboss.arquillian.junit', name: 'arquillian-junit-container'
+    testCompile  group: 'fish.payara.arquillian', name: 'arquillian-payara-micro-5-managed', version: '1.0.Beta3'
+    testCompile group: 'fish.payara.extras', name: 'payara-embedded-all', version: payaraVersion
+    testCompile group: 'org.jboss.shrinkwrap.resolver', name: 'shrinkwrap-resolver-gradle-depchain'
+    testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.0.7'
+    // https://mvnrepository.com/artifact/com.github.tomakehurst/wiremock-standalone
+    testCompile group: 'com.github.tomakehurst', name: 'wiremock-standalone', version: '2.19.0'
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+
+}
+
+war.setBaseName('ROOT')
+war.setVersion('')
+
+test {
+    environment 'MICRO_JAR', getMicroPath()
+}
+
+task run(type: Exec, dependsOn: war) {
+    commandLine('java',
+            '-XX:+UseG1GC',
+            '-Xms128M', '-Xmx1024M',
+            '-XX:+UnlockCommercialFeatures', '-XX:+FlightRecorder', '-XX:FlightRecorderOptions=defaultrecording=true,dumponexit=true,dumponexitpath=build/',
+            '-jar', getMicroPath(), '--deploy', war.archivePath)
+}
+
+task runDebug(type: Exec, dependsOn: war) {
+    commandLine('java', '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=1044', '-XX:+UseG1GC', '-Xms128M', '-Xmx1024M',
+            '-jar', getMicroPath(),
+            '--logProperties', 'src/main/resources/logging.properties',
+            '--deploy', war.archivePath)
+}
+
+task uberJar(type: Exec, dependsOn: war) {
+    String uberJarPath = 'build/libs/' + rootProject.name + '.jar'
+    commandLine('java', '-jar', getMicroPath(), '--deploy', war.archivePath, '--outputUberJar', uberJarPath, '--hzPublicAddress', '""')
+}
+
+def String getMicroPath() {
+    configurations.runtime.find { it.name =~ /payara-micro.*\.jar/ }.absolutePath
+}
+
+task uberZip(type: Zip, dependsOn: uberJar) {
+    from 'build/libs/' + rootProject.name + '.jar'
+    from 'src/launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.jboss.arquillian:arquillian-bom:1.1.14.Final"
+        mavenBom "org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-bom:3.1.3"
+    }
+}
