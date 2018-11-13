@@ -33,7 +33,7 @@ public class RealiableWeatherProviderClient implements WeatherProviderClient {
     }
 
     public WeatherProviderForecast reliableCurrent(Optional<String> cityName) {
-        LOG.warning(String.format("Access to weather service url %s failed, returning reliable response", url));
+        LOG.fine(String.format("Access to weather service url %s failed, returning reliable response", url));
 
         return new WeatherProviderForecast(cityName.orElse("Munich"), -273.15, "Unknown");
     }
